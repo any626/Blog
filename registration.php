@@ -14,6 +14,10 @@ class Registration{
 	*/
 	private $errors = array();
 
+  private $messages = array();
+
+  private $registration_successful = false;
+
 
 	public function __construct(){
 		$this->databaseConnection();
@@ -89,13 +93,27 @@ class Registration{
 
           $user_id = mysqli_insert_id();
 
-
+          if($insert){
+            //send email verification
+            if($this->sendVerficationEmail($user_id, $user_email, $user_activation_hash)){ //still need to make email verification
+              $this->messages[] = MESSAGE_VERIFICATION_MAIL_SENT;
+              $this->registration_successful = true;
+            } else {
+              //delete users info since we could not send verification email
+              $query_delete_user = "DELETE FROM users WHERE ID=$user_id;";
+              $delete = mysqli_query($connection, $query_insert_user);
+              $this->errors[] = MESSAGE_VERIFICATION_MAIL_ERROR;
+            }
+          } else {
+            $this->errors[] = MESSAGE_REGISTRATION_FAILED;
+          }
         }
-
-
       }
-
   	}
+
+    private function sendVerficationEmail($user_id, $user_email, $user_activation_hash){
+      
+    }
 
   	private function sanatize($string){
   		$string = trim($string);
