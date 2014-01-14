@@ -111,8 +111,23 @@ class Registration{
       }
   	}
 
+
+    /*
+    * sends an email 
+    * if successful, it will return true, otherwise false
+    */
     private function sendVerficationEmail($user_id, $user_email, $user_activation_hash){
-      
+
+      $url = "http://127.0.0.1/php-login-advanced/register.php".urlencode($user_id).'&verification_code='.urlencode($user_activation_hash);
+      $email_message = "Please Activate account at $url";
+
+      $sent_email = mail($user_email, "Blog Activation", $url);
+      if($sent_email){
+        return true;
+      } else {
+        $this->errors[] = MESSAGE_VERIFICATION_MAIL_NOT_SENT;
+        return false;
+      }
     }
 
   	private function sanatize($string){
@@ -121,6 +136,13 @@ class Registration{
   		$string = htmlentities($string);
   		return $string;
   	}
+
+    /*
+    * checks the id and hash combination to activate the user, sets activation status to true(1) in the db.
+    */
+    public function verifyNewUser($user_id, $user_activation_hash){
+      
+    }
 
 
 
