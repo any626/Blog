@@ -28,10 +28,10 @@ class Registration{
 	*/
 	private function databaseConnection(){
 		//connection is already open
-  	if($connection != null){
+  	if($this->connection != null){
   		return;
   	} else {
-  		$connection = mysqli_connect("127.0.0.1", "user", "password", "database") or die("Error " . mysqli_error($connection));
+  		$this->connection = mysqli_connect("127.0.0.1", "user", "password", "database") or die("Error " . mysqli_error($this->connection));
   	}
   }
 
@@ -39,8 +39,8 @@ class Registration{
 	* Disconnects MySQL connection and sets it to null.
 	*/
   private function databaseDisconnect(){
-  	mysqli_close($connection);
-  	$connection = null;
+  	mysqli_close($this->connection);
+  	$this->connection = null;
   }
 
  	private function registerNewUser($user_name, $user_email, $user_password, $user_password_repeat){
@@ -63,11 +63,11 @@ class Registration{
       $this->errors[] = MESSAGE_EMAIL_TOO_LONG;
     } else if(!filter_var($user_email, FILTER_VALIDATE_EMAIL)){
       $this->errors[] = MESSAGE_EMAIL_INVALID;
-    } else if($this->$connection){
+    } else if($this->connection){
 
       //check if username or email exist
       $query_username_email = "SELECT user_name, user_email FROM users WHERE user_name=$user_name or user_email=$user_email;";
-      $result = mysqli_query($connection, $query_username_email);
+      $result = mysqli_query($this->connection, $query_username_email);
       $row = mysqli_fetch_array($result);
 
       //If username or email already exist, set error.
@@ -84,7 +84,7 @@ class Registration{
         //write users data into table
         $query_insert_user = "INSERT INTO users (user_name, user_password_hash, user_email, user_activation_hash, user_registration_ip) VALUES ($user_name, $user_password_hash, $user_email, $user_activation_hash, $_SERVER["REMOTE_ADDR"]);";
        
-        $insert = mysqli_query($connection, $query_insert_user);
+        $insert = mysqli_query($this->connection, $query_insert_user);
 
         $user_id = mysqli_insert_id();
 
@@ -96,7 +96,7 @@ class Registration{
           } else {
             //delete users info since we could not send verification email
             $query_delete_user = "DELETE FROM users WHERE ID=$user_id;";
-            $delete = mysqli_query($connection, $query_insert_user);
+            $delete = mysqli_query($this->connection, $query_insert_user);
             $this->errors[] = MESSAGE_VERIFICATION_MAIL_ERROR;
           }
         } else {
@@ -137,7 +137,7 @@ class Registration{
     */
     public function verifyNewUser($user_id, $user_activation_hash){
       $query_update_user = "UPDATE users SET user_active = 1, user_activation_hash = NULL WHERE user_id = $user_id AND user_activation_hash = $user_activation_hash;";
-      $result = mysqli_query($connection,$query_update_user);
+      $result = mysqli_query($this->connection,$query_update_user);
       $query_rows = mysqli_fetch_array($result);
 
       if(count($query_rows) > 0){
