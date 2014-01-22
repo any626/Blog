@@ -45,6 +45,24 @@ class Login{
 		$this->user_is_logged_in = true;
 	}
 
+	private function loginWithCookieData(){
+		if(isset($_COOKIE['rememberme'])){
+			//extract data from the cookie
+			list($user_id, $token, $hash) = explode(':', $_COOKIE['rememberme']);
+			//check cookie hash validity
+			if($hash == hash('sha256', $user_id . ':' . $token . COOKIE_SECRET_KEY) && !empty($token)){
+
+				if($this->connection != null){
+
+					$query_token = "SELECT user_id, user_name, user_email FROM users WHERE user_id= $user_id AND user_rememberme_token= $user_rememberme_token AND user_rememberme_token IS NOT NULL;";
+					$result = mysqli_query($connection, $query_token);
+					$result_row = mysqli_fetch_assoc($result);
+				}
+			}
+
+		}
+	}
+
 }
 
 ?>
